@@ -13,10 +13,13 @@ def index(request):
     # Retrieve the top 5 only - or all if less than 5.
     # Place the List in our context_dict dictionary which will be passed to the template engine.
     category_list = Category.objects.order_by('-likes')[:5]
-    context_dict = {'categories': category_list}
+    mostViewedPage_list = Page.objects.order_by('-views')[:5]
+    context_dict = {'categories': category_list,
+                    'mostViewedPages': mostViewedPage_list,
+    }
 
     for category in category_list:
-        category.url = category.name.replace(' ', '_')
+        category.url = category_name_to_url(category.name)
 
     # Return a rendered response to send to the client.
     # We make use of the shortcut function to make our lives easier.
@@ -31,7 +34,7 @@ def about(request):
 
 def category(request, category_name_url):
     context = RequestContext(request)
-    category_name = category_name_url.replace('_', ' ')
+    category_name = url_to_category_name(category_name_url)
     context_dict = {'category_name': category_name}
 
     try:
@@ -43,3 +46,11 @@ def category(request, category_name_url):
         pass
 
     return render_to_response('rango/category.html', context_dict, context)
+
+
+def category_name_to_url(category_name):
+    return category_name.replace(' ', '_')
+
+
+def url_to_category_name(url):
+    return url.replace('_', ' ')
