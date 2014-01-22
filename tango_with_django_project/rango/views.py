@@ -21,4 +21,3 @@ def about(request):
     context = RequestContext(request)
     return render_to_response('rango/about.html', context)
 
-
