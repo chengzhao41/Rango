@@ -1,11 +1,8 @@
-<!DOCTYPE html>
+{% extends 'rango/base.html' %}
+
+{% block title %}About Tango With Django{% endblock %}
 {% load static %}
-<html>
-<head>
-    <title>About Tango With Django</title>
-</head>
-<body>
+{% block body_block %}
 <a href='/rango/'>Index</a>
 <img src="{% static 'django.jpg'%}" alt="Django Unchained"/>
-</body>
-</html>
+{% endblock %}

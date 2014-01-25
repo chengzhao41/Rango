@@ -34,7 +34,7 @@ def index(request):
 
 def about(request):
     context = RequestContext(request)
-    return render_to_response('rango/about.html', context)
+    return render_to_response('rango/about.html', {}, context)
 
 
 def category(request, category_name_url):
@@ -204,7 +204,7 @@ def user_login(request):
 
 @login_required
 def restricted(request):
-    return HttpResponse("Since you're logged in, you can see this text!")
+    return render_to_response('rango/restricted.html', {}, context)
 
 
 @login_required
