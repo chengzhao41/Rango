@@ -5,7 +5,9 @@
 </head>
 <body>
 <h1>Login to Rango</h1>
-
+{% if loginFailure_message %}
+    <h3>{{ loginFailure_message }}</h3>
+{% endif %}
 <form id="login_form" method="post" action="/rango/login/">
     {% csrf_token %}
     Username: <input type="text" name="username" value="" size="50"/>

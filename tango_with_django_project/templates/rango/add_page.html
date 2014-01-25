@@ -8,23 +8,23 @@
 <h1>Add a Page for {{ category_name }}</h1>
 
 {% if not form %}
-<div style="color: red;">The specified category does not exist!</div>
+    <div style="color: red;">The specified category does not exist!</div>
 {% else %}
-<form id="page_form" method="post" action="/rango/category/{{ category_name_url }}/add_page/">
+    <form id="page_form" method="post" action="/rango/category/{{ category_name_url }}/add_page/">
 
-    {% csrf_token %}
-    {% for hidden in form.hidden_fields %}
-    {{ hidden }}
-    {% endfor %}
+        {% csrf_token %}
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
 
-    {% for field in form.visible_fields %}
-    {{ field.errors }}
-    {{ field.help_text}}
-    {{ field }}
-    {% endfor %}
+        {% for field in form.visible_fields %}
+            {{ field.errors }}
+            {{ field.help_text }}
+            {{ field }}
+        {% endfor %}
 
-    <input type="submit" name="submit" value="Create Page"/>
-</form>
+        <input type="submit" name="submit" value="Create Page"/>
+    </form>
 {% endif %}
 
 </body>
