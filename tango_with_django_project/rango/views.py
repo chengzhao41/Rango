@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from models import Category, Page
 from forms import CategoryForm, PageForm, UserForm, UserProfileForm
+from bing_search import run_query
 
 
 def index(request):
@@ -232,3 +233,17 @@ def user_logout(request):
     logout(request)
 
     return HttpResponseRedirect('/rango/')
+
+
+def search(request):
+    context = RequestContext(request)
+    result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+    return render_to_response('rango/search.html', {'result_list': result_list}, context)
