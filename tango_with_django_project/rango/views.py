@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from models import Category, Page
+from models import Category, Page, UserProfile, User
 from forms import CategoryForm, PageForm, UserForm, UserProfileForm
 from bing_search import run_query
 
@@ -20,7 +20,7 @@ def index(request):
     # Order the categories by no. Likes in descending order.
     # Retrieve the top 5 only - or all if less than 5.
     # Place the List in our context_dict dictionary which will be passed to the template engine.
-    category_list = Category.objects.order_by('-likes')[:5]
+    category_list = get_category_list()
     most_viewed_page_list = Page.objects.order_by('-views')[:5]
     context_dict = {'categories': category_list,
                     'mostViewedPages': most_viewed_page_list,
@@ -33,7 +33,7 @@ def index(request):
         last_visit_time = request.session.get('last_visit')
         visits = request.session.get('visits', 0)
 
-        if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).days > 0:
+        if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).seconds > 1:
             request.session['visits'] = visits + 1
             request.session['last_visit'] = str(datetime.now())
 
@@ -212,6 +212,8 @@ def user_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
+                request.session['user_id'] = user.id
+
                 return HttpResponseRedirect('/rango/')
             else:
                 return HttpResponse("Your Rango account is disabled.")
@@ -247,3 +249,21 @@ def search(request):
             result_list = run_query(query)
 
     return render_to_response('rango/search.html', {'result_list': result_list}, context)
+
+
+def get_category_list():
+    return Category.objects.order_by('-likes')[:5]
+
+
+@login_required
+def profile(request):
+    context = RequestContext(request)
+
+    user = User.objects.get(id=request.session['user_id'])
+    user_profile = UserProfile.objects.get(user=user)
+
+    context_dict = {'user': user,
+                    'user_profile': user_profile,
+    }
+
+    return render_to_response('rango/profile.html', context_dict, context)
