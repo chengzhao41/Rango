@@ -1,29 +1,43 @@
 {% extends 'rango/base.html' %}
 
 {% block body_block %}
-    {% if user.is_authenticated %}
-        <h1>Rango says... hello {{ user.username }}!</h1>
-    {% else %}
-        <h1>Rango says... hello world!</h1>
-    {% endif %}
-    <h2>Most liked Categories</h2>
-    {% if categories %}
-        <u1>
-            {% for category in categories %}
-                <li><a href="/rango/category/{{ category.url }}">{{ category.name }}</a></li>
-            {% endfor %}
-        </u1>
-    {% else %}
-        <strong>There are no categories present</strong>
-    {% endif %}
-    <h2>Most Viewed Pages</h2>
-    {% if mostViewedPages %}
-        <u1>
-            {% for page in mostViewedPages %}
-                <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-            {% endfor %}
-        </u1>
-    {% else %}
-        <strong>There are no pages to present</strong>
-    {% endif %}
+    <div class="hero-unit">
+        <h1>Ready to Rango</h1>
+
+        <p>Find, Add, Share and Rango useful links and resources.</p>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span6">
+            <h2>Top Five Categories</h2>
+            {% if categories %}
+                <ul>
+                    {% for category in categories %}
+                        <li><a href="/rango/category/{{ category.url }}">{{ category.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>No categories at present.</strong>
+            {% endif %}
+
+        </div>
+        <!--/span-->
+        <div class="span6">
+            <h2>Top Five Pages</h2>
+            {% if mostViewedPages %}
+                <ul>
+                    {% for page in mostViewedPages %}
+                        <li><a href="{{ page.url }}">{{ page.title }}</a> - {{ page.category }} ({{ page.views }}
+                            view(s))
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>No pages at present.</strong>
+            {% endif %}
+
+        </div>
+        <!--/span-->
+    </div>
+    <!--/row-->
 {% endblock %}

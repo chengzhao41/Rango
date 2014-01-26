@@ -1,25 +1,32 @@
 {% extends 'rango/base.html' %}
 
 {% block body_block %}
-    <h1>Add a Page for {{ category_name }}</h1>
+    <div class="hero-unit" xmlns="http://www.w3.org/1999/html">
+        <h1>Add a Page for {{ category_name }}</h1>
+        <br/>
 
-    {% if not form %}
-        <div style="color: red;">The specified category does not exist!</div>
-    {% else %}
-        <form id="page_form" method="post" action="/rango/category/{{ category_name_url }}/add_page/">
+        <div class="container">
+            {% if not form %}
+                <div style="color: red;">The specified category does not exist!</div>
+            {% else %}
+                <form class="span6" id="page_form" method="post"
+                      action="/rango/category/{{ category_name_url }}/add_page/">
 
-            {% csrf_token %}
-            {% for hidden in form.hidden_fields %}
-                {{ hidden }}
-            {% endfor %}
+                    {% csrf_token %}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
 
-            {% for field in form.visible_fields %}
-                {{ field.errors }}
-                {{ field.help_text }}
-                {{ field }}
-            {% endfor %}
-
-            <input type="submit" name="submit" value="Create Page"/>
-        </form>
-    {% endif %}
+                    {% for field in form.visible_fields %}
+                        {{ field.errors }}
+                        {{ field.help_text }}
+                        {{ field }}
+                        <br/>
+                    {% endfor %}
+                    <br/>
+                    <button class="btn btn-primary" input type="submit" name="submit">Create Page</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
