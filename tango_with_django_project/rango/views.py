@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from models import Category, Page, UserProfile, User
+from models import Category, Page, UserProfile
 from forms import CategoryForm, PageForm, UserForm, UserProfileForm
 from bing_search import run_query
 
@@ -212,14 +212,13 @@ def user_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                request.session['user_id'] = user.id
 
                 return HttpResponseRedirect('/rango/')
             else:
                 return HttpResponse("Your Rango account is disabled.")
         else:
             print "Invalid login details: {0}, {1}".format(username, password)
-            return render_to_response('rango/login.html', {'loginFailure_message': "Invalid login details"}, context)
+            return render_to_response('rango/login.html', {'bad_details': True}, context)
     else:
         return render_to_response('rango/login.html', {}, context)
 
@@ -259,10 +258,10 @@ def get_category_list():
 def profile(request):
     context = RequestContext(request)
 
-    user = User.objects.get(id=request.session['user_id'])
-    user_profile = UserProfile.objects.get(user=user)
+    #user = User.objects.get(id=request.session['user_id'])
+    user_profile = UserProfile.objects.get(user=request.user)
 
-    context_dict = {'user': user,
+    context_dict = {'user': request.user,
                     'user_profile': user_profile,
     }
 
