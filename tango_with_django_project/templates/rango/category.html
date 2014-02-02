@@ -9,7 +9,7 @@
             {% if pages %}
                 <u1>
                     {% for page in pages %}
-                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                        <li><a href="/rango/goto/?page_id={{ page.id }}">{{ page.title }}</a></li>
                     {% endfor %}
                 </u1>
             {% else %}

@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
 from models import Category, Page, UserProfile
 from forms import CategoryForm, PageForm, UserForm, UserProfileForm
@@ -31,7 +32,7 @@ def index(request):
         last_visit_time = request.session.get('last_visit')
         visits = request.session.get('visits', 0)
 
-        if (datetime.now() - datetime.strptime(last_visit_time, "%Y-%m-%d %H:%M:%S")).seconds > 1:
+        if (datetime.now() - datetime.strptime(last_visit_time, "%Y-%m-%d %H:%M:%S.%f")).seconds > 1:
             request.session['visits'] = visits + 1
             request.session['last_visit'] = str(datetime.now())
 
@@ -269,3 +270,17 @@ def profile(request):
     }
 
     return render_to_response('rango/profile.html', context_dict, context)
+
+
+def track_url(request):
+    if request.method == 'GET' and 'page_id' in request.GET:
+        page_id = request.GET['page_id']
+        try:
+            page = Page.objects.get(id=page_id)
+        except:
+            return HttpResponseRedirect(reverse('rango:index'))
+        page.views += 1
+        page.save()
+        return HttpResponseRedirect(page.url)
+
+    return HttpResponseRedirect(reverse('rango:index'))
