@@ -3,13 +3,19 @@
 {% block title %}{{ category_name }}{% endblock %}
 
 {% block body_block %}
-    <div class="hero-unit">
+    <div class="hero-unit" xmlns="http://www.w3.org/1999/html">
         <h1>{{ category_name }}</h1>
         {% if category %}
             {% if pages %}
                 <u1>
                     {% for page in pages %}
-                        <li><a href="/rango/goto/?page_id={{ page.id }}">{{ page.title }}</a></li>
+                        <li><a href="/rango/goto/?page_id={{ page.id }}">{{ page.title }}</a>
+                            {% if page.views > 1 %}
+                                - ({{ page.views }} views)
+                            {% elif page.views == 1 %}
+                                - ({{ page.views }} view)
+                            {% endif %}
+                        </li>
                     {% endfor %}
                 </u1>
             {% else %}
@@ -22,5 +28,38 @@
         {% else %}
             The specified category {{ category_name }} does not exist!
         {% endif %}
+
+        <div class="container-fluid">
+            <br/>
+
+            <p>Search for a page.</p>
+
+            <form class="span8 form-search" id="search_form" method="post"
+                  action="/rango/category/{{ category_name_url }}">
+                {% csrf_token %}
+                <!-- Display the search form elements here -->
+                <input type="text" class="input-long search-query" name="query" value="{{ category_name }}" id="query"/>
+                <button class="btn btn-success" type="submit" name="submit" value="Search"/>
+                Search</button>
+                <br/>
+            </form>
+
+            {% if result_list %}
+                <br/>
+                <br/>
+                <!-- Display search results in an ordered list -->
+                <ol>
+                    {% for result in result_list %}
+                        <li>
+                            <strong><a href="{{ result.link }}">{{ result.title }}</a></strong><br/>
+                            <em>{{ result.summary }}</em>
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% else %}
+                <br/>
+                <p>No results found</p>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

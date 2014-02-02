@@ -37,7 +37,6 @@
                     {% endif %}
                 </ul>
                 <ul class="nav">
-                    <li><a href="/rango/search/">Search</a></li>
                     {% if user.is_authenticated %}
                         <li><a href="/rango/restricted/">Restricted</a></li>
                         <li><a href="/rango/add_category/">Add Category</a></li>
@@ -54,9 +53,13 @@
     <div class="row-fluid">
         <div class="span3">
             <div class="well sidebar-nav">
-                {% if categories %}
-                    {% include 'rango/category_list.html' %}
-                {% endif %}
+                {% block sidebar %}
+                {% endblock %}
+                <div id="cats">
+                    {% if categories %}
+                        {% include 'rango/category_list.html' with categories=categories %}
+                    {% endif %}
+                </div>
             </div>
             <!--/.well -->
         </div>

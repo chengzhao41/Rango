@@ -60,12 +60,18 @@ def category(request, category_name_url):
     }
 
     try:
-        category = Category.objects.get(name=category_name)
-        pages = Page.objects.filter(category=category)
+        category = Category.objects.get(name__iexact=category_name)
+        pages = Page.objects.filter(category=category).order_by('-views')
         context_dict['pages'] = pages
         context_dict['category'] = category
     except Category.DoesNotExist:
         pass
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            result_list = run_query(query)
+            context_dict['result_list'] = result_list
 
     return render_to_response('rango/category.html', context_dict, context)
 
@@ -263,10 +269,12 @@ def get_category_list():
 @login_required
 def profile(request):
     context = RequestContext(request)
+    category_list = get_category_list()
     user_profile = UserProfile.objects.get(user=request.user)
 
     context_dict = {'user': request.user,
                     'user_profile': user_profile,
+                    'categories': category_list,
     }
 
     return render_to_response('rango/profile.html', context_dict, context)
@@ -277,7 +285,7 @@ def track_url(request):
         page_id = request.GET['page_id']
         try:
             page = Page.objects.get(id=page_id)
-        except:
+        except Page.DoesNotExist:
             return HttpResponseRedirect(reverse('rango:index'))
         page.views += 1
         page.save()
