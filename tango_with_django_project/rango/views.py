@@ -21,19 +21,17 @@ def index(request):
     # Retrieve the top 5 only - or all if less than 5.
     # Place the List in our context_dict dictionary which will be passed to the template engine.
     category_list = get_category_list()
+
     most_viewed_page_list = Page.objects.order_by('-views')[:5]
     context_dict = {'categories': category_list,
                     'mostViewedPages': most_viewed_page_list,
     }
 
-    for category in category_list:
-        category.url = encode_url(category.name)
-
     if request.session.get('last_visit'):
         last_visit_time = request.session.get('last_visit')
         visits = request.session.get('visits', 0)
 
-        if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).seconds > 1:
+        if (datetime.now() - datetime.strptime(last_visit_time, "%Y-%m-%d %H:%M:%S")).seconds > 1:
             request.session['visits'] = visits + 1
             request.session['last_visit'] = str(datetime.now())
 
@@ -53,8 +51,12 @@ def about(request):
 def category(request, category_name_url):
     context = RequestContext(request)
     category_name = decode_url(category_name_url)
+    category_list = get_category_list()
+
     context_dict = {'category_name': category_name,
-                    'category_name_url': category_name_url}
+                    'category_name_url': category_name_url,
+                    'categories': category_list,
+    }
 
     try:
         category = Category.objects.get(name=category_name)
@@ -251,14 +253,15 @@ def search(request):
 
 
 def get_category_list():
-    return Category.objects.order_by('-likes')[:5]
+    category_list = Category.objects.order_by('-likes')[:5]
+    for category in category_list:
+        category.url = encode_url(category.name)
+    return category_list
 
 
 @login_required
 def profile(request):
     context = RequestContext(request)
-
-    #user = User.objects.get(id=request.session['user_id'])
     user_profile = UserProfile.objects.get(user=request.user)
 
     context_dict = {'user': request.user,
