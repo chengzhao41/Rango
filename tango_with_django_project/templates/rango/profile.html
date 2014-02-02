@@ -4,7 +4,9 @@
     <div class="hero-unit">
         <h1>{{ user.username }}</h1><br/>
 
-        <img src="/media/{{ user_profile.picture }}" alt="{{ user.username }}'s Profile Picture"/>
+        {% if user_profile.picture %}
+            <img src="/media/{{ user_profile.picture }}" alt="{{ user.username }}'s Profile Picture"/>
+        {% endif %}
 
         <h3>
             e-mail: {{ user.email }}<br/>
