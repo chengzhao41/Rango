@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.template import RequestContext
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -84,12 +84,13 @@ def get_category_list(max_results=0, starts_with=''):
 
 def suggest_category(request):
     cat_list = []
+    context = RequestContext(request)
     starts_with = ''
     if request.method == 'GET':
         starts_with = request.GET['suggestion']
 
     cat_list = get_category_list(8, starts_with)
-    return render('rango/category_list.html', {'categories': cat_list})
+    return render_to_response('rango/category_list.html', {'categories': cat_list}, context)
 
 
 def category(request, category_name_url):
@@ -153,6 +154,25 @@ def add_category(request):
     # Bad form (or form details), no form supplied...
     # Render the form with error messages (if any).
     return render_to_response('rango/add_category.html', {'form': form}, context)
+
+
+@login_required
+def auto_add_page(request):
+    context = RequestContext(request)
+    if request.method == 'GET':
+        cat_id = request.GET['category_id']
+        url = request.GET['url']
+        title = request.GET['title']
+
+        if cat_id and title and url:
+            try:
+                category = Category.objects.get(id=cat_id)
+            except Category.DoesNotExist:
+                return HttpResponse("Category.DoesNotExist")
+            Page.objects.get_or_create(category=category, title=title, url=url)
+            pages = Page.objects.filter(category=category).order_by('-views')
+
+    return render_to_response('rango/page_list.html', {'pages': pages}, context)
 
 
 @login_required
