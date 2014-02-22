@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -49,6 +49,49 @@ def about(request):
     return render_to_response('rango/about.html', {'visits': visits}, context)
 
 
+@login_required
+def like_category(request):
+    if request.method == 'GET':
+        category_id = request.GET['category_id']
+
+        try:
+            category = Category.objects.get(id=category_id)
+            category.likes += 1
+            category.save()
+        except Category.DoesNotExist:
+            pass
+    else:
+        return HttpResponse("Should be POST")
+
+    return HttpResponse(category.likes)
+
+
+def get_category_list(max_results=0, starts_with=''):
+    cat_list = []
+    if starts_with:
+        cat_list = Category.objects.filter(name__istartswith=starts_with).order_by('-likes')
+    else:
+        cat_list = Category.objects.all()
+
+    if max_results > 0:
+        if len(cat_list) > max_results:
+            cat_list = cat_list[:max_results]
+
+    for cat in cat_list:
+        cat.url = encode_url(cat.name)
+    return cat_list
+
+
+def suggest_category(request):
+    cat_list = []
+    starts_with = ''
+    if request.method == 'GET':
+        starts_with = request.GET['suggestion']
+
+    cat_list = get_category_list(8, starts_with)
+    return render('rango/category_list.html', {'categories': cat_list})
+
+
 def category(request, category_name_url):
     context = RequestContext(request)
     category_name = decode_url(category_name_url)
@@ -58,7 +101,6 @@ def category(request, category_name_url):
                     'category_name_url': category_name_url,
                     'categories': category_list,
     }
-
     try:
         category = Category.objects.get(name__iexact=category_name)
         pages = Page.objects.filter(category=category).order_by('-views')
@@ -257,13 +299,6 @@ def search(request):
             result_list = run_query(query)
 
     return render_to_response('rango/search.html', {'result_list': result_list}, context)
-
-
-def get_category_list():
-    category_list = Category.objects.order_by('-likes')[:5]
-    for category in category_list:
-        category.url = encode_url(category.name)
-    return category_list
 
 
 @login_required

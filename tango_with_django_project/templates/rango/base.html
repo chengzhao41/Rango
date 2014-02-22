@@ -54,6 +54,14 @@
         <div class="span3">
             <div class="well sidebar-nav">
                 {% block sidebar %}
+                    <ul class="nav nav-list">
+                        <li class="nav-header">Find a Category</li>
+                        <form>
+                            <label></label>
+                            <li><input class="search-query span10" type="text" name="suggestion" value=""
+                                       id="suggestion"</li>
+                        </form>
+                    </ul>
                 {% endblock %}
                 <div id="cats">
                     {% if categories %}
@@ -78,6 +86,7 @@
 
 <script src="{% static 'js/jquery-2.1.0.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/rango-ajax.js' %}"></script>
 
 </body>
 
