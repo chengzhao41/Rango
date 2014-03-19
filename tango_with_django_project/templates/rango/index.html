@@ -24,8 +24,19 @@
             {% else %}
                 <strong>No pages at present.</strong>
             {% endif %}
-
         </div>
+
+        <div class="span6">
+            <h2>News Feed</h2>
+            {% if feeds %}
+                <ul>
+                    {% for feed in feeds %}
+                        <li>{{ feed }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
         <!--/span-->
     </div>
     <!--/row-->

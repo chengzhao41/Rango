@@ -1,11 +1,13 @@
 from datetime import datetime
 
+from actstream.models import Action
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from actstream import action
 
 from models import Category, Page, UserProfile
 from forms import CategoryForm, PageForm, UserForm, UserProfileForm
@@ -24,8 +26,10 @@ def index(request):
     category_list = get_category_list()
 
     most_viewed_page_list = Page.objects.order_by('-views')[:5]
+    feed_list = Action.objects.order_by('-timestamp')[:5]
     context_dict = {'categories': category_list,
                     'mostViewedPages': most_viewed_page_list,
+                    'feeds': feed_list,
     }
 
     if request.session.get('last_visit'):
@@ -103,18 +107,22 @@ def category(request, category_name_url):
                     'categories': category_list,
     }
     try:
-        category = Category.objects.get(name__iexact=category_name)
-        pages = Page.objects.filter(category=category).order_by('-views')
+        cat = Category.objects.get(name__iexact=category_name)
+        pages = Page.objects.filter(category=cat).order_by('-views')
         context_dict['pages'] = pages
-        context_dict['category'] = category
+        context_dict['category'] = cat
     except Category.DoesNotExist:
         pass
 
     if request.method == 'POST':
-        query = request.POST['query'].strip()
-        if query:
-            result_list = run_query(query)
-            context_dict['result_list'] = result_list
+        try:
+            query = request.POST['query'].strip()
+
+            if query:
+                result_list = run_query(query)
+                context_dict['result_list'] = result_list
+        except Exception:
+            pass
 
     return render_to_response('rango/category.html', context_dict, context)
 
@@ -139,10 +147,12 @@ def add_category(request):
         # Have we been provided with a valid form?
         if form.is_valid():
             # Save the new category to the database.
-            form.save(commit=True)
+            category = form.save(commit=True)
 
             # Now call the index() view.
             # The user will be shown the homepage.
+
+            action.send(request.user, verb='added', action_object=category)
             return index(request)
         else:
             # The supplied form contained errors - just print them to the terminal.
@@ -204,7 +214,7 @@ def add_page(request, category_name_url):
 
             # With this, we can then save our new model instance.
             page.save()
-
+            action.send(request.user, verb='added page', action_object=page, target=cat)
             # Now that the page is saved, display the category instead.
             return category(request, category_name_url)
         else:
@@ -256,6 +266,8 @@ def register(request):
             profile.save()
 
             registered = True
+            action.send(profile.user, verb='just registered')
+
 
         else:
             print user_form.errors, profile_form.errors

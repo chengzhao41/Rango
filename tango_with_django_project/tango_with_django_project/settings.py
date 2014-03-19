@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'rango',
     'south',
+    'actstream',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,6 +59,17 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'tango_with_django_project.urls'
 
 WSGI_APPLICATION = 'tango_with_django_project.wsgi.application'
+
+
+# Activity
+ACTSTREAM_SETTINGS = {
+    'MODELS': ('rango.userprofile', 'auth.user', 'rango.category', 'rango.page'),
+    'MANAGER': 'actstream.managers.ActionManager',
+    'FETCH_RELATIONS': True,
+    'USE_PREFETCH': True,
+    'USE_JSONFIELD': True,
+    'GFK_FETCH_DEPTH': 1,
+}
 
 
 # Database
